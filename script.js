@@ -88,3 +88,42 @@ function saveToDatabase(song, artist, image) {
     .then(() => { alert("✅ Success! Song posted."); })
     .catch((error) => { alert("❌ Error: " + error.message); });
 }
+
+
+// --- 5. THE FEED (Read from Database) ---
+function loadFeed() {
+    // Show the feed container
+    document.getElementById("feed-container").style.display = "block";
+
+    // Listen for updates in REAL-TIME
+    db.collection("posts")
+      .orderBy("timestamp", "desc") // Newest first
+      .limit(20)
+      .onSnapshot((snapshot) => {
+          
+          const feedDiv = document.getElementById("feed");
+          feedDiv.innerHTML = ""; // Clear old posts
+
+          snapshot.forEach((doc) => {
+              const post = doc.data();
+              
+              // Create HTML for one card
+              const cardHTML = `
+                <div class="post-card">
+                    <img src="${post.image_url}" class="post-img">
+                    <div class="post-info">
+                        <span class="user-tag">@${post.user} is listening to</span>
+                        <h4>${post.song_title}</h4>
+                        <p>${post.artist_name}</p>
+                    </div>
+                </div>
+              `;
+              
+              feedDiv.innerHTML += cardHTML;
+          });
+      });
+}
+
+// IMPORTANT: Call this function when the user logs in!
+// Go find your 'window.onload' function (Step 2 in script.js) 
+// and add 'loadFeed();' right after 'localStorage.setItem...'
