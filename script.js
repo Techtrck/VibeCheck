@@ -28,15 +28,22 @@ function loginWithSpotify() {
     window.location = url;
 }
 
-// Check for Token on Load
+// ✅ Check for Token on Load
 window.onload = () => {
     const hash = window.location.hash;
+    
+    // Check if we have the Spotify Token
     if (hash.includes("access_token")) {
+        // Hide hero and show app
         document.querySelector('.hero').style.display = 'none';
         document.getElementById('app-area').style.display = 'block';
         
+        // Extract token
         const token = hash.split('&')[0].split('=')[1];
         localStorage.setItem("spotify_token", token);
+
+        // 👇 IMPORTANT: Load the feed immediately 👇
+        loadFeed(); 
     }
 };
 
@@ -47,17 +54,18 @@ async function searchSong() {
 
     if (!token) { alert("Please Login first!"); return; }
 
-    const response = await fetch(`https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=1`, {
-        method: "GET",
-        headers: { "Authorization": "Bearer " + token }
-    });
+ // REPLACE THE WEIRD URL WITH THIS CORRECT SPOTIFY API URL:
+const response = await fetch(`https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=1`, {
+    method: "GET",
+    headers: { "Authorization": "Bearer " + token }
+});
 
     const data = await response.json();
 
     if (data.tracks.items.length > 0) {
         const song = data.tracks.items[0];
         const songName = song.name.replace(/'/g, ""); 
-        const artistName = song.artists[0].name.replace(/'/g, "");
+        const artistName = song.artists[0].name.replace(/'/g, ""); 
         const imageUrl = song.album.images[0].url;
 
         document.getElementById("results").innerHTML = `
@@ -89,25 +97,21 @@ function saveToDatabase(song, artist, image) {
     .catch((error) => { alert("❌ Error: " + error.message); });
 }
 
-
-// --- 5. THE FEED (Read from Database) ---
+// --- 5. THE FEED FUNCTION ---
 function loadFeed() {
-    // Show the feed container
+    // Show the container
     document.getElementById("feed-container").style.display = "block";
 
-    // Listen for updates in REAL-TIME
+    // Listen to the database in REAL-TIME
     db.collection("posts")
       .orderBy("timestamp", "desc") // Newest first
       .limit(20)
       .onSnapshot((snapshot) => {
-          
           const feedDiv = document.getElementById("feed");
           feedDiv.innerHTML = ""; // Clear old posts
 
           snapshot.forEach((doc) => {
               const post = doc.data();
-              
-              // Create HTML for one card
               const cardHTML = `
                 <div class="post-card">
                     <img src="${post.image_url}" class="post-img">
@@ -118,12 +122,7 @@ function loadFeed() {
                     </div>
                 </div>
               `;
-              
               feedDiv.innerHTML += cardHTML;
           });
       });
 }
-
-// IMPORTANT: Call this function when the user logs in!
-// Go find your 'window.onload' function (Step 2 in script.js) 
-// and add 'loadFeed();' right after 'localStorage.setItem...'
