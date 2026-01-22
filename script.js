@@ -1,14 +1,18 @@
 // script.js (SIMULATION MODE)
 
 // --- 1. FIREBASE CONFIGURATION (Keep your real keys here) ---
+// --- 1. FIREBASE CONFIGURATION ---
 const firebaseConfig = {
-    // 🔴 PASTE YOUR FIREBASE KEYS HERE ONE LAST TIME
-    apiKey: "AIzaSy...", 
-    authDomain: "vibecheck-70b3e.firebaseapp.com",
-    projectId: "vibecheck-70b3e",
-    storageBucket: "vibecheck-70b3e.appspot.com",
-    messagingSenderId: "...",
-    appId: "..."
+    // 🔴 KEEP YOUR API KEY (The one starting with AIza...)
+    apiKey: "AIzaSy...", // <--- MAKE SURE THIS IS YOUR REAL KEY FROM FIREBASE CONSOLE!
+    
+    // 👇 I FIXED THESE LINES FOR YOU:
+    authDomain: "vibe-check-70b3e.firebaseapp.com",
+    projectId: "vibe-check-70b3e",
+    storageBucket: "vibe-check-70b3e.appspot.com",
+    
+    messagingSenderId: "PASTE_SENDER_ID_HERE",
+    appId: "PASTE_APP_ID_HERE"
 };
 
 // Initialize Firebase
