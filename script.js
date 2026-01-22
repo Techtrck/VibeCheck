@@ -1,89 +1,85 @@
-// script.js
+// script.js (SIMULATION MODE)
 
-// --- 1. CONFIGURATION ---
+// --- 1. FIREBASE CONFIGURATION (Keep your real keys here) ---
 const firebaseConfig = {
-    // 🔴 PASTE YOUR FIREBASE KEYS HERE 🔴
+    // 🔴 PASTE YOUR FIREBASE KEYS HERE ONE LAST TIME
     apiKey: "AIzaSy...", 
     authDomain: "vibecheck-70b3e.firebaseapp.com",
     projectId: "vibecheck-70b3e",
-    // ... add the rest ...
+    storageBucket: "vibecheck-70b3e.appspot.com",
+    messagingSenderId: "...",
+    appId: "..."
 };
 
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// Spotify Config
-const clientId = "PASTE_YOUR_CLIENT_ID_HERE"; 
-const redirectUri = "https://techtrck.github.io/VibeCheck/"; 
 
-// --- 2. AUTHENTICATION ---
+// --- 2. FAKE LOGIN LOGIC (Bypassing Spotify) ---
 function loginWithSpotify() {
-    const scope = "user-read-private user-read-email";
-    let url = 'https://accounts.spotify.com/authorize';
-    url += '?response_type=token';
-    url += '&client_id=' + encodeURIComponent(clientId);
-    url += '&scope=' + encodeURIComponent(scope);
-    url += '&redirect_uri=' + encodeURIComponent(redirectUri);
-    window.location = url;
-}
-
-// ✅ Check for Token on Load
-window.onload = () => {
-    const hash = window.location.hash;
+    // Simulate a delay to make it look real
+    const btn = document.querySelector('.btn');
+    btn.innerText = "Connecting to Spotify...";
     
-    // Check if we have the Spotify Token
-    if (hash.includes("access_token")) {
-        // Hide hero and show app
+    setTimeout(() => {
+        // Pretend we got a token
+        localStorage.setItem("spotify_token", "simulation_token_123");
+        
+        // Switch screens
         document.querySelector('.hero').style.display = 'none';
         document.getElementById('app-area').style.display = 'block';
         
-        // Extract token
-        const token = hash.split('&')[0].split('=')[1];
-        localStorage.setItem("spotify_token", token);
+        // Load the Feed
+        loadFeed();
+        alert("✅ Logged in as 'Alex' (Simulation Mode)");
+    }, 1500);
+}
 
-        // 👇 IMPORTANT: Load the feed immediately 👇
-        loadFeed(); 
+// Check if already logged in
+window.onload = () => {
+    if (localStorage.getItem("spotify_token")) {
+        document.querySelector('.hero').style.display = 'none';
+        document.getElementById('app-area').style.display = 'block';
+        loadFeed();
     }
 };
 
-// --- 3. SEARCH LOGIC ---
-async function searchSong() {
-    const query = document.getElementById("search-box").value;
-    const token = localStorage.getItem("spotify_token");
 
-    if (!token) { alert("Please Login first!"); return; }
+// --- 3. MOCK SEARCH LOGIC (Fake Database) ---
+const mockSongs = [
+    { name: "Starboy", artist: "The Weeknd", img: "https://i.scdn.co/image/ab67616d0000b2734718e28d24227b9dc6410312" },
+    { name: "Die With A Smile", artist: "Lady Gaga, Bruno Mars", img: "https://i.scdn.co/image/ab67616d0000b27382ea2e9e1858aa012c57cd45" },
+    { name: "Espresso", artist: "Sabrina Carpenter", img: "https://i.scdn.co/image/ab67616d0000b273659cd4673230913b3988ae2b" },
+    { name: "Birds of a Feather", artist: "Billie Eilish", img: "https://i.scdn.co/image/ab67616d0000b27371d62ea7ea8a5be92d3c1f62" },
+    { name: "Not Like Us", artist: "Kendrick Lamar", img: "https://i.scdn.co/image/ab67616d0000b2731ea0c62b2339cbf493a999ad" }
+];
 
- // REPLACE THE WEIRD URL WITH THIS CORRECT SPOTIFY API URL:
-const response = await fetch(`https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=1`, {
-    method: "GET",
-    headers: { "Authorization": "Bearer " + token }
-});
+function searchSong() {
+    const query = document.getElementById("search-box").value.toLowerCase();
+    const resultsDiv = document.getElementById("results");
+    
+    // Find a song that matches what you typed
+    const match = mockSongs.find(s => s.name.toLowerCase().includes(query) || s.artist.toLowerCase().includes(query));
 
-    const data = await response.json();
-
-    if (data.tracks.items.length > 0) {
-        const song = data.tracks.items[0];
-        const songName = song.name.replace(/'/g, ""); 
-        const artistName = song.artists[0].name.replace(/'/g, ""); 
-        const imageUrl = song.album.images[0].url;
-
-        document.getElementById("results").innerHTML = `
-            <div style="margin-top:20px; text-align:center;">
-                <img src="${imageUrl}" style="width:150px; border-radius:10px; margin-bottom:10px;">
-                <h3>${songName}</h3>
-                <p style="color:#b3b3b3;">${artistName}</p>
-                <button class="btn" onclick="saveToDatabase('${songName}', '${artistName}', '${imageUrl}')">
+    if (match) {
+        resultsDiv.innerHTML = `
+            <div style="margin-top:20px; text-align:center; animation: fadeIn 0.5s;">
+                <img src="${match.img}" style="width:150px; border-radius:10px; margin-bottom:10px;">
+                <h3>${match.name}</h3>
+                <p style="color:#b3b3b3;">${match.artist}</p>
+                <button class="btn" onclick="saveToDatabase('${match.name}', '${match.artist}', '${match.img}')">
                     POST TO FEED 🚀
                 </button>
             </div>
         `;
     } else {
-        alert("Song not found!");
+        alert("Song not found in Demo Mode! \nTry searching for: 'Starboy', 'Espresso', or 'Birds'.");
     }
 }
 
-// --- 4. DATABASE LOGIC ---
+
+// --- 4. REAL DATABASE SAVE (This still works!) ---
 function saveToDatabase(song, artist, image) {
     db.collection("posts").add({
         song_title: song,
@@ -93,22 +89,21 @@ function saveToDatabase(song, artist, image) {
         timestamp: firebase.firestore.FieldValue.serverTimestamp(),
         visible_to_friends: true 
     })
-    .then(() => { alert("✅ Success! Song posted."); })
+    .then(() => { alert("✅ Success! Song posted to Real Database."); })
     .catch((error) => { alert("❌ Error: " + error.message); });
 }
 
-// --- 5. THE FEED FUNCTION ---
+
+// --- 5. REAL FEED (This still works!) ---
 function loadFeed() {
-    // Show the container
     document.getElementById("feed-container").style.display = "block";
 
-    // Listen to the database in REAL-TIME
     db.collection("posts")
-      .orderBy("timestamp", "desc") // Newest first
+      .orderBy("timestamp", "desc")
       .limit(20)
       .onSnapshot((snapshot) => {
           const feedDiv = document.getElementById("feed");
-          feedDiv.innerHTML = ""; // Clear old posts
+          feedDiv.innerHTML = ""; 
 
           snapshot.forEach((doc) => {
               const post = doc.data();
