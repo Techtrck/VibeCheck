@@ -4,35 +4,628 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VibeCheck 🎧</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated background gradient */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 50%, rgba(29, 185, 84, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(30, 215, 96, 0.08) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 80px 20px 60px;
+            animation: fadeInUp 0.8s ease;
+        }
+
+        .logo-wrapper {
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: clamp(3rem, 8vw, 5rem);
+            font-weight: 900;
+            background: linear-gradient(135deg, #1DB954 0%, #1ed760 50%, #1DB954 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+            letter-spacing: -2px;
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .subtitle {
+            font-size: clamp(1rem, 3vw, 1.4rem);
+            color: #b3b3b3;
+            margin-bottom: 50px;
+            font-weight: 400;
+            line-height: 1.6;
+        }
+
+        .subtitle i {
+            color: #1DB954;
+            font-style: normal;
+            font-weight: 700;
+        }
+
+        /* Button Styles */
+        .btn {
+            background: linear-gradient(135deg, #1DB954 0%, #1ed760 100%);
+            color: #000;
+            padding: 18px 50px;
+            font-size: 1.1rem;
+            font-weight: 800;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            box-shadow: 0 10px 30px rgba(29, 185, 84, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(29, 185, 84, 0.5);
+        }
+
+        .btn:active {
+            transform: translateY(-1px) scale(1.02);
+        }
+
+        /* App Area */
+        .app-area {
+            display: none;
+            animation: fadeInUp 0.6s ease;
+        }
+
+        .search-section {
+            background: rgba(24, 24, 24, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .search-box-wrapper {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        input {
+            width: 100%;
+            padding: 18px 50px 18px 20px;
+            border-radius: 50px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            background: rgba(40, 40, 40, 0.8);
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        input:focus {
+            border-color: #1DB954;
+            background: rgba(40, 40, 40, 1);
+            box-shadow: 0 0 0 3px rgba(29, 185, 84, 0.1);
+        }
+
+        input::placeholder {
+            color: #666;
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+            pointer-events: none;
+        }
+
+        /* Results Section */
+        #results {
+            margin-top: 30px;
+        }
+
+        .result-card {
+            background: linear-gradient(135deg, rgba(40, 40, 40, 0.9) 0%, rgba(30, 30, 30, 0.9) 100%);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: scaleIn 0.5s ease;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .result-card img {
+            width: 200px;
+            height: 200px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s ease;
+        }
+
+        .result-card img:hover {
+            transform: scale(1.05);
+        }
+
+        .result-card h3 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            font-weight: 800;
+        }
+
+        .result-card p {
+            color: #b3b3b3;
+            font-size: 1.1rem;
+            margin-bottom: 25px;
+        }
+
+        /* Feed Section */
+        .feed-container {
+            display: none;
+            background: rgba(24, 24, 24, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            animation: fadeInUp 0.6s ease;
+        }
+
+        .live-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 0, 0, 0.1);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #ff4444;
+            margin-left: 15px;
+        }
+
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background: #ff4444;
+            border-radius: 50%;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+
+        /* Post Cards */
+        .post-card {
+            background: linear-gradient(135deg, rgba(40, 40, 40, 0.95) 0%, rgba(30, 30, 30, 0.95) 100%);
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            animation: slideIn 0.5s ease;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-left: 4px solid #1DB954;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .post-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            border-left-color: #1ed760;
+        }
+
+        .post-img {
+            width: 80px;
+            height: 80px;
+            border-radius: 12px;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        .post-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .user-tag {
+            font-size: 0.75rem;
+            color: #1DB954;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .post-info h4 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .post-info p {
+            font-size: 0.9rem;
+            color: #b3b3b3;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .loading::after {
+            content: '...';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero {
+                padding: 50px 20px 40px;
+            }
+
+            .search-section,
+            .feed-container {
+                padding: 25px;
+            }
+
+            .section-title {
+                font-size: 1.5rem;
+            }
+
+            .post-card {
+                padding: 15px;
+                gap: 15px;
+            }
+
+            .post-img {
+                width: 60px;
+                height: 60px;
+            }
+
+            .result-card img {
+                width: 150px;
+                height: 150px;
+            }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #1DB954;
+        }
+    </style>
 </head>
 <body>
+    <div class="container">
+        <!-- Hero Section -->
+        <div class="hero" id="hero">
+            <div class="logo-wrapper">
+                <h1>VibeCheck.</h1>
+            </div>
+            <p class="subtitle">See what your friends are <i>actually</i> listening to.</p>
+            <button class="btn" onclick="loginWithSpotify()">
+                🎵 Connect Spotify
+            </button>
+        </div>
 
-    <div class="hero">
-        <h1>VibeCheck.</h1>
-        <p class="subtitle">See what your friends are <i>actually</i> listening to.</p>
-        <button class="btn" onclick="loginWithSpotify()">Connect Spotify</button>
+        <!-- App Area -->
+        <div class="app-area" id="app-area">
+            <!-- Search Section -->
+            <div class="search-section">
+                <h2 class="section-title">🔍 Search</h2>
+                <div class="search-box-wrapper">
+                    <input type="text" id="search-box" placeholder="Search for a song or artist...">
+                    <span class="search-icon">🔎</span>
+                </div>
+                <button class="btn" onclick="searchSong()">Search</button>
+                <div id="results"></div>
+            </div>
+
+            <!-- Feed Section -->
+            <div class="feed-container" id="feed-container">
+                <h2 class="section-title">
+                    Live Vibe Feed
+                    <span class="live-indicator">
+                        <span class="live-dot"></span>
+                        LIVE
+                    </span>
+                </h2>
+                <div id="feed">
+                    <p class="loading">Loading vibes</p>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div id="app-area" class="app-container">
-        <h2>Search</h2>
-        <input type="text" id="search-box" placeholder="Search for a song...">
-        <button class="btn" onclick="searchSong()">Search</button>
-        <div id="results"></div>
-    </div>
-    <div id="feed-container" class="app-container" style="display:none; margin-top: 20px;">
-         <h2>Live Vibe Feed 🔴</h2>
-         <div id="feed">
-             <p style="color: grey;">Loading vibes...</p>
-         </div>
-    </div>
-
+    <!-- Firebase Scripts -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    
+    <!-- Your script.js -->
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSy...", // Replace with your actual key
+            authDomain: "vibe-check-70b3e.firebaseapp.com",
+            projectId: "vibe-check-70b3e",
+            storageBucket: "vibe-check-70b3e.appspot.com",
+            messagingSenderId: "PASTE_SENDER_ID_HERE",
+            appId: "PASTE_APP_ID_HERE"
+        };
 
-    <script src="script.js"></script>
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
 
+        // Mock Songs Database
+        const mockSongs = [
+            { name: "Starboy", artist: "The Weeknd", img: "https://i.scdn.co/image/ab67616d0000b2734718e28d24227b9dc6410312" },
+            { name: "Die With A Smile", artist: "Lady Gaga, Bruno Mars", img: "https://i.scdn.co/image/ab67616d0000b27382ea2e9e1858aa012c57cd45" },
+            { name: "Espresso", artist: "Sabrina Carpenter", img: "https://i.scdn.co/image/ab67616d0000b273659cd4673230913b3988ae2b" },
+            { name: "Birds of a Feather", artist: "Billie Eilish", img: "https://i.scdn.co/image/ab67616d0000b27371d62ea7ea8a5be92d3c1f62" },
+            { name: "Not Like Us", artist: "Kendrick Lamar", img: "https://i.scdn.co/image/ab67616d0000b2731ea0c62b2339cbf493a999ad" }
+        ];
+
+        // Login Function
+        function loginWithSpotify() {
+            const btn = event.target;
+            btn.innerText = "🔄 Connecting...";
+            btn.style.opacity = "0.7";
+            
+            setTimeout(() => {
+                localStorage.setItem("spotify_token", "simulation_token_123");
+                document.getElementById('hero').style.display = 'none';
+                document.getElementById('app-area').style.display = 'block';
+                loadFeed();
+            }, 1500);
+        }
+
+        // Check if already logged in
+        window.onload = () => {
+            if (localStorage.getItem("spotify_token")) {
+                document.getElementById('hero').style.display = 'none';
+                document.getElementById('app-area').style.display = 'block';
+                loadFeed();
+            }
+        };
+
+        // Search Function
+        function searchSong() {
+            const query = document.getElementById("search-box").value.toLowerCase().trim();
+            const resultsDiv = document.getElementById("results");
+            
+            if (!query) {
+                resultsDiv.innerHTML = '<p style="color:#666; text-align:center; margin-top:20px;">Please enter a search term</p>';
+                return;
+            }
+
+            const match = mockSongs.find(s => 
+                s.name.toLowerCase().includes(query) || 
+                s.artist.toLowerCase().includes(query)
+            );
+
+            if (match) {
+                resultsDiv.innerHTML = `
+                    <div class="result-card">
+                        <img src="${match.img}" alt="${match.name}">
+                        <h3>${match.name}</h3>
+                        <p>${match.artist}</p>
+                        <button class="btn" onclick='saveToDatabase("${match.name}", "${match.artist}", "${match.img}")'>
+                            🚀 Post to Feed
+                        </button>
+                    </div>
+                `;
+            } else {
+                resultsDiv.innerHTML = `
+                    <div style="text-align:center; padding:40px; color:#666;">
+                        <p style="font-size:3rem; margin-bottom:15px;">🎵</p>
+                        <p style="font-size:1.1rem;">Song not found in Demo Mode</p>
+                        <p style="margin-top:10px; font-size:0.9rem;">Try: Starboy, Espresso, or Birds of a Feather</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Allow search on Enter key
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchBox = document.getElementById('search-box');
+            if (searchBox) {
+                searchBox.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') searchSong();
+                });
+            }
+        });
+
+        // Save to Database
+        function saveToDatabase(song, artist, image) {
+            db.collection("posts").add({
+                song_title: song,
+                artist_name: artist,
+                image_url: image,
+                user: "Alex",
+                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                visible_to_friends: true 
+            })
+            .then(() => {
+                alert("✅ Posted successfully!");
+                document.getElementById("results").innerHTML = '';
+                document.getElementById("search-box").value = '';
+            })
+            .catch((error) => {
+                alert("❌ Error: " + error.message);
+            });
+        }
+
+        // Load Feed
+        function loadFeed() {
+            const feedContainer = document.getElementById("feed-container");
+            feedContainer.style.display = "block";
+
+            db.collection("posts")
+              .orderBy("timestamp", "desc")
+              .limit(20)
+              .onSnapshot((snapshot) => {
+                  const feedDiv = document.getElementById("feed");
+                  
+                  if (snapshot.empty) {
+                      feedDiv.innerHTML = '<p class="loading">No posts yet. Be the first to share!</p>';
+                      return;
+                  }
+
+                  feedDiv.innerHTML = "";
+
+                  snapshot.forEach((doc) => {
+                      const post = doc.data();
+                      const cardHTML = `
+                        <div class="post-card">
+                            <img src="${post.image_url}" class="post-img" alt="${post.song_title}">
+                            <div class="post-info">
+                                <span class="user-tag">@${post.user} is listening to</span>
+                                <h4>${post.song_title}</h4>
+                                <p>${post.artist_name}</p>
+                            </div>
+                        </div>
+                      `;
+                      feedDiv.innerHTML += cardHTML;
+                  });
+              });
+        }
+    </script>
 </body>
 </html>
